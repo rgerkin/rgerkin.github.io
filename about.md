@@ -10,8 +10,6 @@ My interests are:
 - Reproducible, extensible neurophysiology models.  
 - Olfactory physiology and psychophysics.  
 
-My CV is [here](https://docs.google.com/document/d/1hEIU2YHSCL_IWYItcukjETogPO-njRpRGCsgsxVhgfU/edit?hl=en_US).
-
 ### Software projects I manage:
 
 - [Recording Artist](https://bitbucket.org/rgerkin/recording-artist), an acquisition and analysis suite for use with [Igor Pro](http://www.wavemetrics.com/products/igorpro/igorpro.htm).
