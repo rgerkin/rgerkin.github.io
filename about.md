@@ -5,10 +5,13 @@ permalink: /about/
 ---
 
 I'm Richard C. (Rick) Gerkin, Ph.D., a neuroscientist and scientific software developer at Arizona State University.  
-My interests are:  
-- Neuroinformatics and how to make good use of neurophysiology data.   
-- Reproducible, extensible neurophysiology models.  
-- Olfactory physiology and psychophysics.  
+
+### My interests and goals are:  
+
+- Neuroinformatics and promoting efficient use of neurophysiology data.   
+- Creating and sharing reproducible, extensible neurophysiology models.  
+- Solving the stimulus-percept problem in human olfaction.
+- Using statistical models and machine learning to improve disease prediction.
 
 ### Software projects I manage:
 
