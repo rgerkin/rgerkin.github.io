@@ -15,6 +15,7 @@ I'm Richard C. (Rick) Gerkin, Ph.D., a neuroscientist and scientific software de
 
 ### Software projects I manage:
 
-- [SciUnit](https://github.com/scidash/sciunit), a software infrastructure for data-driven validation of scientific models.  
-- [NeuronUnit](https://github.com/scidash/neuronunit), a SciUnit library for testing neurophysiology models against experimental data.  
+- [SciDash](http://www.scidash.org), a software infrastructure for data-driven validation of scientific models, consisting of:
+  - The [SciUnit](https://github.com/scidash/sciunit) package, a python framework for domain-independent model validation. 
+  - The [NeuronUnit](https://github.com/scidash/neuronunit) library for testing neurophysiology models against experimental data.  
 - [Recording Artist](https://bitbucket.org/rgerkin/recording-artist), an acquisition and analysis suite for use with [Igor Pro](http://www.wavemetrics.com/products/igorpro/igorpro.htm).
