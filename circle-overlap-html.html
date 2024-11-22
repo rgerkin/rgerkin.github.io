@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Circle Overlap Visualizer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        .container { padding: 1rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .border { border: 1px solid #e5e7eb; }
+        .rounded { border-radius: 0.25rem; }
+        .p-4 { padding: 1rem; }
+        .w-full { width: 100%; }
+        .block { display: block; }
+        .text-sm { font-size: 0.875rem; }
+        .font-medium { font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        function overlap(d, ratio) {
+            function intersectionArea(d, ratio) {
+                if (d >= 1 + ratio) return 0;
+                if (d <= Math.abs(1 - ratio)) return Math.PI * Math.min(1, ratio) ** 2;
+                
+                const part1 = Math.acos((d ** 2 + 1 - ratio ** 2) / (2 * d));
+                const part2 = Math.acos((d ** 2 + ratio ** 2 - 1) / (2 * d * ratio));
+                const part3 = 0.5 * Math.sqrt((-d + 1 + ratio) * (d + 1 - ratio) * (d - 1 + ratio) * (d + 1 + ratio));
+                return part1 + ratio ** 2 * part2 - part3;
+            }
+            const A_intersection = intersectionArea(d, ratio);
+            const A_union = Math.PI + Math.PI * ratio ** 2 - A_intersection;
+            return A_intersection / A_union;
+        }
+
+        function CircleVisualizer() {
+            const [d, setD] = React.useState(0.5);
+            const [ratio, setRatio] = React.useState(1);
+            const canvasRef = React.useRef(null);
+            
+            const baseRadius = 100;
+            const overlapPercentage = overlap(d, ratio) * 100;
+
+            React.useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = 600;
+                canvas.height = 400;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const centerX1 = canvas.width / 2 - (d * baseRadius);
+                const centerX2 = canvas.width / 2 + (d * baseRadius);
+                const centerY = canvas.height / 2;
+                
+                ctx.beginPath();
+                ctx.arc(centerX1, centerY, baseRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(centerX2, centerY, baseRadius * ratio, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
+                ctx.fill();
+            }, [d, ratio]);
+
+            const logRatio = Math.log2(ratio);
+            const minLogRatio = Math.log2(0.5);
+            const maxLogRatio = Math.log2(2);
+
+            return (
+                <div className="container space-y-4">
+                    <div className="border rounded p-4">
+                        <canvas ref={canvasRef} className="border rounded"/>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <div>
+                            <label className="block text-sm font-medium">
+                                Core Distance: {d.toFixed(2)}
+                            </label>
+                            <input 
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={d}
+                                onChange={(e) => setD(Number(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium">
+                                Overlap: {overlapPercentage.toFixed(1)}%
+                            </label>
+                            <input 
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                value={overlapPercentage}
+                                className="w-full"
+                                disabled
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium">
+                                Circle B/A Ratio: {ratio.toFixed(2)}
+                            </label>
+                            <input 
+                                type="range"
+                                min={minLogRatio}
+                                max={maxLogRatio}
+                                step="0.01"
+                                value={logRatio}
+                                onChange={(e) => setRatio(Math.pow(2, Number(e.target.value)))}
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CircleVisualizer />);
+    </script>
+</body>
+</html>
