@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gaussian Overlap Visualizer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        .container { padding: 1rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .border { border: 1px solid #e5e7eb; }
+        .rounded { border-radius: 0.25rem; }
+        .p-4 { padding: 1rem; }
+        .w-full { width: 100%; }
+        .block { display: block; }
+        .text-sm { font-size: 0.875rem; }
+        .font-medium { font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        function gaussian1D(x, mean, sigma) {
+            const dx = x - mean;
+            return (1/sigma) * Math.exp(-(dx*dx)/(2*sigma*sigma));
+        }
+
+        function GaussianVisualizer() {
+            const [d, setD] = React.useState(2);
+            const [intensity, setIntensity] = React.useState(1);
+            const [complexity, setComplexity] = React.useState(1);
+            const canvasRef = React.useRef(null);
+
+            React.useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                ctx.clearRect(0, 0, width, height);
+                
+                const margin = 40;
+                const plotWidth = width - 2 * margin;
+                const plotHeight = height - 2 * margin;
+
+                // Calculate max height of first gaussian for scaling
+                const g1Peak = 1; // Peak height of standard gaussian
+                const yMax = g1Peak * 2; // Set y-axis to 2x the peak height
+                
+                // Plot functions
+                const plotX = x => margin + ((x + 6) * plotWidth / 12);
+                const plotY = y => height - margin - (y * plotHeight / yMax);
+                
+                // Draw axes
+                ctx.beginPath();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.moveTo(margin, height - margin);
+                ctx.lineTo(width - margin, height - margin);
+                ctx.moveTo(margin, height - margin);
+                ctx.lineTo(margin, margin);
+                ctx.stroke();
+
+                // Add grid lines
+                ctx.strokeStyle = '#eee';
+                ctx.beginPath();
+                // Vertical grid lines
+                for (let x = -6; x <= 6; x += 2) {
+                    const xPos = margin + ((x + 6) * plotWidth / 12);
+                    ctx.moveTo(xPos, margin);
+                    ctx.lineTo(xPos, height - margin);
+                }
+                // Horizontal grid lines (0 to yMax in steps of 0.2)
+                for (let y = 0; y <= yMax; y += 0.2) {
+                    const yPos = plotY(y);
+                    ctx.moveTo(margin, yPos);
+                    ctx.lineTo(width - margin, yPos);
+                }
+                ctx.stroke();
+
+                // Generate points
+                const points = [];
+                const dx = 0.1;
+                for (let x = -6; x <= 6; x += dx) {
+                    const g1 = gaussian1D(x, -d/2, 1);
+                    const g2 = gaussian1D(x, d/2, complexity) * intensity;
+                    points.push({x, g1, g2});
+                }
+
+                // Draw filled intersection area
+                ctx.beginPath();
+                ctx.moveTo(plotX(points[0].x), plotY(0));
+                for (const pt of points) {
+                    const y = Math.min(pt.g1, pt.g2);
+                    ctx.lineTo(plotX(pt.x), plotY(y));
+                }
+                ctx.lineTo(plotX(points[points.length-1].x), plotY(0));
+                ctx.fillStyle = 'rgba(128, 128, 128, 0.2)';
+                ctx.fill();
+
+                // Draw first Gaussian (solid)
+                ctx.beginPath();
+                ctx.moveTo(plotX(-6), plotY(0));
+                for (const pt of points) {
+                    ctx.lineTo(plotX(pt.x), plotY(pt.g1));
+                }
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw second Gaussian (dashed)
+                ctx.beginPath();
+                ctx.moveTo(plotX(-6), plotY(0));
+                for (const pt of points) {
+                    ctx.lineTo(plotX(pt.x), plotY(pt.g2));
+                }
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Add axis labels
+                ctx.fillStyle = '#000';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Position (standard deviations)', width/2, height - 10);
+                ctx.save();
+                ctx.translate(15, height/2);
+                ctx.rotate(-Math.PI/2);
+                ctx.fillText('Magnitude', 0, 0);
+                ctx.restore();
+
+                // Add tick marks
+                ctx.textAlign = 'center';
+                for (let x = -6; x <= 6; x += 2) {
+                    const xPos = plotX(x);
+                    ctx.fillText(x.toString(), xPos, height - margin + 20);
+                }
+
+            }, [d, intensity, complexity]);
+
+            const logIntensity = Math.log2(intensity);
+            const minLogIntensity = Math.log2(0.5);
+            const maxLogIntensity = Math.log2(2);
+
+            return (
+                <div className="container space-y-4">
+                    <div className="border rounded p-4">
+                        <canvas 
+                            ref={canvasRef} 
+                            width="600" 
+                            height="400" 
+                            className="border rounded"
+                        />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <div>
+                            <label className="block text-sm font-medium">
+                                Distance: {d.toFixed(2)}
+                            </label>
+                            <input 
+                                type="range"
+                                min="0"
+                                max="6"
+                                step="0.1"
+                                value={d}
+                                onChange={(e) => setD(Number(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium">
+                                Intensity: {intensity.toFixed(2)}
+                            </label>
+                            <input 
+                                type="range"
+                                min={minLogIntensity}
+                                max={maxLogIntensity}
+                                step="0.01"
+                                value={logIntensity}
+                                onChange={(e) => setIntensity(Math.pow(2, Number(e.target.value)))}
+                                className="w-full"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium">
+                                Complexity: {complexity.toFixed(2)}
+                            </label>
+                            <input 
+                                type="range"
+                                min="0.5"
+                                max="2"
+                                step="0.1"
+                                value={complexity}
+                                onChange={(e) => setComplexity(Number(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<GaussianVisualizer />);
+    </script>
+</body>
+</html>
