@@ -6,7 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     <style>
-        .container { padding: 1rem; }
+        .container { padding: 1rem; max-width: 800px; margin: 0 auto; }
         .space-y-4 > * + * { margin-top: 1rem; }
         .space-y-2 > * + * { margin-top: 0.5rem; }
         .border { border: 1px solid #e5e7eb; }
@@ -16,6 +16,47 @@
         .block { display: block; }
         .text-sm { font-size: 0.875rem; }
         .font-medium { font-weight: 500; }
+        .grid { display: grid; }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .gap-4 { gap: 1rem; }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+        }
+        .button {
+            background-color: #4B5563;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #374151;
+        }
+        .instructions {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 0.25rem;
+        }
+        .url-display {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            word-break: break-all;
+        }
+        .url-display a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .url-display a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -30,6 +71,10 @@
             const [d, setD] = React.useState(2);
             const [intensity, setIntensity] = React.useState(1);
             const [complexity, setComplexity] = React.useState(1);
+            const [sessionId, setSessionId] = React.useState('');
+            const [annotatorId, setAnnotatorId] = React.useState('');
+            const [sampleId1, setSampleId1] = React.useState('');
+            const [sampleId2, setSampleId2] = React.useState('');
             const canvasRef = React.useRef(null);
 
             React.useEffect(() => {
@@ -71,7 +116,7 @@
                     ctx.moveTo(xPos, margin);
                     ctx.lineTo(xPos, height - margin);
                 }
-                // Horizontal grid lines (0 to yMax in steps of 0.2)
+                // Horizontal grid lines
                 for (let y = 0; y <= yMax; y += 0.2) {
                     const yPos = plotY(y);
                     ctx.moveTo(margin, yPos);
@@ -141,6 +186,46 @@
 
             }, [d, intensity, complexity]);
 
+            const generateUrl = () => {
+                const baseUrl = 'https://osmo.jotform.com/12345';
+                const params = new URLSearchParams({
+                    session_id: sessionId,
+                    annotator_id: annotatorId,
+                    sample_id_1: sampleId1,
+                    sample_id_2: sampleId2
+                });
+                return `${baseUrl}?${params.toString()}`;
+            };
+
+            const handleSubmit = () => {
+                const headers = ['created_at', 'annotator_id', 'sample_id_1', 'sample_id_2', 'distance', 'intensity', 'complexity'];
+                const currentDateTime = new Date().toISOString();
+                const newRow = [
+                    currentDateTime,
+                    annotatorId,
+                    sampleId1,
+                    sampleId2,
+                    d.toFixed(2),
+                    intensity.toFixed(2),
+                    complexity.toFixed(2)
+                ];
+
+                const csvContent = [
+                    headers.join(','),
+                    newRow.join(',')
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', 'dissimilarity-pilot.csv');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            };
+
             const logIntensity = Math.log2(intensity);
             const minLogIntensity = Math.log2(0.5);
             const maxLogIntensity = Math.log2(2);
@@ -201,6 +286,74 @@
                                 className="w-full"
                             />
                         </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Session ID
+                            </label>
+                            <input 
+                                type="text" 
+                                maxLength="20"
+                                value={sessionId}
+                                onChange={(e) => setSessionId(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Annotator ID
+                            </label>
+                            <input 
+                                type="text" 
+                                maxLength="20"
+                                value={annotatorId}
+                                onChange={(e) => setAnnotatorId(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Sample ID 1
+                            </label>
+                            <input 
+                                type="text" 
+                                maxLength="20"
+                                value={sampleId1}
+                                onChange={(e) => setSampleId1(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Sample ID 2
+                            </label>
+                            <input 
+                                type="text" 
+                                maxLength="20"
+                                value={sampleId2}
+                                onChange={(e) => setSampleId2(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="url-display">
+                        <a href={generateUrl()} target="_blank" rel="noopener noreferrer">
+                            {generateUrl()}
+                        </a>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button 
+                            className="button"
+                            onClick={handleSubmit}
+                        >
+                            Submit
+                        </button>
+                    </div>
+
+                    <div className="instructions">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                        </p>
                     </div>
                 </div>
             );
