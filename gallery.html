@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    
+    <!-- React and ReactDOM -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        const Button = ({ children, onClick, variant, className }) => {
+            const baseStyle = "px-4 py-2 rounded-md font-medium transition-colors";
+            const variants = {
+                default: "bg-blue-500 hover:bg-blue-600 text-white",
+                destructive: "bg-red-500 hover:bg-red-600 text-white",
+                outline: "border border-gray-300 hover:bg-gray-100"
+            };
+            
+            return (
+                <button 
+                    onClick={onClick}
+                    className={`${baseStyle} ${variants[variant || 'default']} ${className || ''}`}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        const Input = ({ type, placeholder, value, onChange, className }) => (
+            <input
+                type={type}
+                placeholder={placeholder}
+                value={value}
+                onChange={onChange}
+                className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${className || ''}`}
+            />
+        );
+
+        const Card = ({ children, className }) => (
+            <div className={`bg-white rounded-xl shadow-lg ${className || ''}`}>
+                {children}
+            </div>
+        );
+
+        const Alert = ({ children }) => (
+            <div className="bg-gray-100 border border-gray-200 rounded-lg p-4">
+                {children}
+            </div>
+        );
+
+        const PhotoGallery = () => {
+            const [photos, setPhotos] = useState([]);
+            const [username, setUsername] = useState('');
+            const [votes, setVotes] = useState({});
+            const [userVotes, setUserVotes] = useState({});
+            const [showVoters, setShowVoters] = useState(false);
+            const fileInputRef = useRef(null);
+
+            const handleFileUpload = (event) => {
+                const files = Array.from(event.target.files);
+                
+                files.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            setPhotos(prev => [...prev, {
+                                url: e.target.result,
+                                votes: 0
+                            }]);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+            };
+
+            const handleVote = (index) => {
+                if (!username.trim()) {
+                    alert('Please enter a username before voting');
+                    return;
+                }
+
+                setVotes(prev => {
+                    const newVotes = { ...prev };
+                    
+                    // Remove user's previous vote if it exists
+                    const previousVote = userVotes[username];
+                    if (previousVote !== undefined && newVotes[previousVote]) {
+                        newVotes[previousVote].delete(username);
+                        if (newVotes[previousVote].size === 0) {
+                            delete newVotes[previousVote];
+                        }
+                    }
+                    
+                    // Add new vote
+                    if (!newVotes[index]) {
+                        newVotes[index] = new Set();
+                    }
+                    newVotes[index].add(username);
+                    
+                    return newVotes;
+                });
+
+                setUserVotes(prev => ({
+                    ...prev,
+                    [username]: index
+                }));
+            };
+
+            const resetGallery = () => {
+                setPhotos([]);
+                setVotes({});
+                setUserVotes({});
+            };
+
+            return (
+                <Card className="w-full max-w-4xl mx-auto p-6 my-8">
+                    <div className="space-y-6">
+                        <div className="flex flex-wrap gap-4">
+                            <Input
+                                type="text"
+                                placeholder="Enter username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                className="max-w-xs"
+                            />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleFileUpload}
+                                className="hidden"
+                                ref={fileInputRef}
+                            />
+                            <Button onClick={() => fileInputRef.current?.click()}>
+                                Upload Photos
+                            </Button>
+                            <Button onClick={resetGallery} variant="destructive">
+                                Reset Gallery
+                            </Button>
+                            <Button 
+                                onClick={() => setShowVoters(!showVoters)}
+                                variant="outline"
+                            >
+                                {showVoters ? 'Hide Voters' : 'Reveal Voters'}
+                            </Button>
+                        </div>
+
+                        {photos.length === 0 ? (
+                            <Alert>
+                                No photos uploaded yet. Upload some photos to get started!
+                            </Alert>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {photos.map((photo, index) => (
+                                    <div
+                                        key={index}
+                                        className="relative group cursor-pointer"
+                                        onClick={() => handleVote(index)}
+                                    >
+                                        <img
+                                            src={photo.url}
+                                            alt="Gallery item"
+                                            className="w-full h-48 object-cover rounded-lg transition-transform transform group-hover:scale-105"
+                                        />
+                                        <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded">
+                                            {votes[index]?.size || 0} votes
+                                        </div>
+                                        {showVoters && votes[index]?.size > 0 && (
+                                            <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded max-w-[90%] overflow-hidden">
+                                                Voters: {Array.from(votes[index]).join(', ')}
+                                            </div>
+                                        )}
+                                        {userVotes[username] === index && (
+                                            <div className="absolute top-2 right-2 bg-green-500 bg-opacity-75 text-white px-2 py-1 rounded">
+                                                Your Vote
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </Card>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PhotoGallery />);
+    </script>
+</body>
+</html>
