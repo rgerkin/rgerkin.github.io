@@ -9,15 +9,18 @@
 
     <meta name="author" content="{{ site.name }}" />
     <meta name="description" content="{{ site.description }}">
+    <link rel="icon" href="{{ site.baseurl }}/images/favicon.svg" type="image/svg+xml">
 
     <!--[if lt IE 9]>
       <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css?v=5" />
     <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
 
-    <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&amp;family=Manrope:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500&amp;display=swap" rel="stylesheet">
   </head>
 
   <body>
@@ -32,13 +35,11 @@
           </div>
           
           <nav>
-            <a href="http://www.scidash.org">SciDash</a>
-            <a href="http://iconlab.asu.edu">ICON Lab</a>
-            <a href="https://osmonauts.org">Osmonauts</a>
-            <a href="http://pyrfume.org">Pyrfume</a>
-            <a href="http://github.com/rgerkin/recording-artist">Recording Artist</a>
+            <a href="{{ site.baseurl }}/#work">Work</a>
+            <a href="{{ site.baseurl }}/#path">Path</a>
+            <a href="{{ site.baseurl }}/#research">Research</a>
+            <a href="{{ site.baseurl }}/#software">Software</a>
             <a href="{{ site.baseurl }}/cv">CV</a>
-            <a href="{{ site.baseurl }}/about">About</a>
           </nav>
         </header>
       </div>
@@ -51,7 +52,11 @@
     <div class="wrapper-footer">
       <div class="container">
         <footer class="footer">
-          {% include svg-icons.html %}
+          <div class="footer-links">
+            <a href="https://github.com/rgerkin">GitHub</a>
+            <a href="https://www.linkedin.com/in/rgerkin">LinkedIn</a>
+            <a href="mailto:rgerkin@asu.edu">Email</a>
+          </div>
         </footer>
       </div>
     </div>

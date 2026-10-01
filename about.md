@@ -4,19 +4,16 @@ title: About
 permalink: /about/
 ---
 
-I'm Richard C. (Rick) Gerkin, Ph.D., a neuroscientist and scientific software developer at Arizona State University.  
+I’m Richard C. (Rick) Gerkin, Ph.D. I study human olfaction and develop software for testing scientific models. I’m Head of Neuroscience at [Osmo](https://www.osmo.ai/) and a Research Professor at Arizona State University.
 
-### My interests and goals are:  
+Most of my current work asks why a molecule smells the way it does. I collect human odor ratings and use them to train and test machine-learning models.
 
-- Neuroinformatics and promoting efficient use of neurophysiology data.   
-- Creating and sharing reproducible, extensible neurophysiology models.  
-- Solving the stimulus-percept problem in human olfaction.
-- Using statistical models and machine learning to improve disease prediction.
+I trained in Neurobiology at the University of Pittsburgh, where I studied plasticity in small networks of hippocampal neurons. As a postdoc at Carnegie Mellon, I recorded from the olfactory bulb and helped develop NeuroElectro. At Arizona State University I began building tools for model validation and working on human olfaction. Later I joined the Principal Odor Map project as a visiting faculty researcher at Google Research. I now lead neuroscience at Osmo.
 
-### Software projects I manage:
+### Selected projects
 
-- [SciDash](http://scidash.org), a software infrastructure for data-driven validation of scientific models, consisting of:
-  - The [SciUnit](https://github.com/scidash/sciunit) package, a python framework for domain-independent model validation. 
-  - The [NeuronUnit](https://github.com/scidash/neuronunit) library for testing neurophysiology models against experimental data.  
-- [Pyrfume](http://pyrfume.org), a project to discover and analyze olfactory psychophysics data.
-- [Recording Artist](https://github/rgerkin/recording-artist), an acquisition and analysis suite for use with [Igor Pro](http://www.wavemetrics.com/products/igorpro/igorpro.htm).
+- [Pyrfume](https://pyrfume.org) collects published odor datasets and provides Python code for loading them.
+- [SciUnit](https://github.com/scidash/sciunit) runs tests of scientific models against experimental results.
+- [NeuronUnit](https://github.com/scidash/neuronunit) contains SciUnit tests for neuron and ion-channel models.
+- The [DREAM Olfaction Prediction Challenge](https://github.com/dream-olfaction/olfaction-prediction) compared models from teams trying to predict human odor ratings.
+- The [Global Consortium for Chemosensory Research](https://gcchemosensr.org/) found that recent smell loss was a strong predictor of COVID-19.
